@@ -10,6 +10,14 @@ import com.example.amova1.MARGIN
 
 class DemoView(ctx : Context,attrs : AttributeSet?) : View(ctx,attrs) {
 
+    var model: DemoModel? = null
+
+    set(value) {
+        field = value
+        invalidate()
+
+    }
+
 
     private val brush: Paint = Paint().apply {
         color = Color.parseColor("#AA8BC2")
@@ -20,8 +28,12 @@ class DemoView(ctx : Context,attrs : AttributeSet?) : View(ctx,attrs) {
 
 
     override fun onDraw(canvas: Canvas?) {
+        val localmodel : DemoModel? = model
+            if(localmodel != null){
 
-            canvas?.drawLine(0f, 0f,width.toFloat(),height.toFloat(),brush)
+                canvas?.drawLine(localmodel.start.x, localmodel.start.y,localmodel.end.x,localmodel.end.y,brush)
+            }
+
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
