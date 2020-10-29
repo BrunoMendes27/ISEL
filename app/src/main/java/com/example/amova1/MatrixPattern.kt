@@ -32,8 +32,8 @@ class MatrixPattern(private val pattern: List<Position>,val side:Int): Iterable<
 
     override fun iterator() = pattern.iterator()
 
-
-
-
+    operator fun plus(position: Position)= MatrixPattern(pattern + position,side)
+    val count : Int
+        get() = pattern.size
 
 }
