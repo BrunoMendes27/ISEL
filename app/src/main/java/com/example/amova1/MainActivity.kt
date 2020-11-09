@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import androidx.activity.viewModels
 import androidx.core.view.postDelayed
 import com.example.amova1.databinding.ActivityMainBinding
 import com.example.amova1.tilePanel.OnTileTouchListener
@@ -29,37 +30,59 @@ private open class OnTileTouchAdapter: OnTileTouchListener {
 }
 
 private const val PATTERN_SIZE = 8
+private const val MATRIX_STATE = "MatrixViewModel"
 
 class MainActivity : AppCompatActivity() {
 
-        private fun startGame(binding: ActivityMainBinding, ToGuess:MatrixPattern){
+        private fun drawToGuess(viewModel: MatrixViewModel,binding: ActivityMainBinding){
 
-            var current = MatrixPattern.empty(binding.MatrixView.widthInTiles)
-            drawPattern(binding.MatrixView,current)
+            viewModel.StartGame(PATTERN_SIZE,binding.MatrixView.widthInTiles)
+            drawPattern(binding.MatrixView,viewModel.toGuess)
+            binding.StartButton.isEnabled = false
+            binding.StartButton.setOnClickListener(null)
 
-            binding.MatrixView.setListener(object : OnTileTouchAdapter(){
-                override fun onClick(xTile: Int, yTile: Int): Boolean {
-                    current += Position(xTile,yTile)
-                    drawPattern(binding.MatrixView,current)
-                    if(current.count == ToGuess.count){
-                        endGame(binding,ToGuess)
-                    }
-
-                    return true
-                }
-
-            })
-
-        }
-
-        private fun endGame(binding: ActivityMainBinding, ToGuess:MatrixPattern){
-            binding.MatrixView.setListener(null)
             binding.StartButton.postDelayed(5000){
-                binding.StartButton.isEnabled = true
-                drawPattern(binding.MatrixView,ToGuess)
+                drawCurrent(viewModel,binding)
             }
-
         }
+
+         private fun drawCurrent(viewModel: MatrixViewModel, binding: ActivityMainBinding) {
+        drawPattern(binding.MatrixView, viewModel.current)
+
+        binding.StartButton.isEnabled = false
+        binding.StartButton.setOnClickListener(null)
+        binding.MatrixView.setListener(object : OnTileTouchAdapter() {
+            override fun onClick(xTile: Int, yTile: Int): Boolean {
+                viewModel.addGuess(Position(xTile, yTile))
+                if (!viewModel.IsgameOngoing()) drawHasEnded(viewModel, binding)
+                else drawCurrent(viewModel, binding)
+                return true
+            }
+        })
+    }
+
+
+        private fun drawNotStarted(viewModel: MatrixViewModel,binding: ActivityMainBinding){
+            drawPattern(binding.MatrixView,viewModel.current)
+        binding.StartButton.isEnabled=true
+        binding.StartButton.setOnClickListener{
+            drawToGuess(viewModel,binding)
+        }
+            binding.MatrixView.setListener(null)
+    }
+
+        private fun drawHasEnded(viewModel: MatrixViewModel, binding: ActivityMainBinding) {
+        drawPattern(binding.MatrixView, viewModel.current)
+        binding.StartButton.isEnabled = true
+        binding.StartButton.setOnClickListener { drawToGuess(viewModel, binding) }
+        binding.MatrixView.setListener(null)
+        binding.StartButton.postDelayed(5000) {
+            binding.StartButton.isEnabled = true
+            drawPattern(binding.MatrixView, viewModel.toGuess)
+        }
+    }
+
+   private val viewModel: MatrixViewModel by viewModels()
 
         override fun onCreate(savedInstanceState: Bundle?) {
             super.onCreate(savedInstanceState)
@@ -68,21 +91,22 @@ class MainActivity : AppCompatActivity() {
             val view = binding.root
             setContentView(view)
 
-        binding.StartButton.setOnClickListener{
-
-            val ToGuess = MatrixPattern.fromRandom(8,binding.MatrixView.widthInTiles)
-            drawPattern(binding.MatrixView,ToGuess)
 
 
-            binding.StartButton.postDelayed(10000) {
-                startGame(binding,ToGuess)
+            if(viewModel.IsgameOngoing()) {
+                if(viewModel.current?.count ==0)
+                    drawToGuess(viewModel,binding)
+                else drawCurrent(viewModel, binding)
+            } else
+                drawNotStarted(viewModel, binding)
 
-
-            }
         }
 
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putParcelable(MATRIX_STATE, viewModel.getState())
+    }
     }
 
-
-}
 
