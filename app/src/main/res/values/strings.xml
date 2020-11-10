@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">AMOVA1</string>
+    <string name="startLabel">Start</string>
 </resources>

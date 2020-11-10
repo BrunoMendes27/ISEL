@@ -19,6 +19,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+
+    kotlinOptions{
+        jvmTarget = "1.8"
+    }
     buildTypes {
         release {
             minifyEnabled false
@@ -37,4 +41,9 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.0'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
+    implementation "androidx.lifecycle:lifecycle-common-java8:$lifecycle_version"
+    implementation "androidx.activity:activity-ktx:$activity_version"
+    implementation "android.arch.lifecycle:extensions:1.1.1"
+    implementation "androidx.fragment:fragment-ktx:1.1.0"
 }
